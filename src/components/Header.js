@@ -1,14 +1,12 @@
+import Logo from './Logo';
+
 export default function Header({ currentPage, setCurrentPage, cartCount }) {
   return (
     <header className="bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-lg">
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <div 
-          onClick={() => setCurrentPage('home')}
-          className="cursor-pointer flex items-center gap-2"
-        >
-          <span className="text-3xl font-bold text-orange-500">SPORT</span>
-          <span className="text-3xl font-bold">HORIZON</span>
+        {/* Logo - Remplace par le composant Logo */}
+        <div onClick={() => setCurrentPage('home')}>
+          <Logo />
         </div>
 
         {/* Navigation */}

@@ -1,4 +1,4 @@
-export default function CartPage({ cart, removeFromCart, setCurrentPage }) {
+export default function CartPage({ cart, removeFromCart, updateCartQuantity, setCurrentPage }) {
   const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
 
   if (cart.length === 0) {
@@ -31,24 +31,48 @@ export default function CartPage({ cart, removeFromCart, setCurrentPage }) {
                 key={item.id}
                 className="flex items-center gap-4 p-6 border-b hover:bg-orange-50 transition"
               >
-                <span className="text-6xl">{item.image}</span>
+                {/* Image */}
+                <img 
+                  src={item.image} 
+                  alt={item.nom}
+                  className="w-20 h-20 rounded-lg object-cover"
+                />
                 
+                {/* Détails */}
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-gray-800">{item.nom}</h3>
-                  <p className="text-orange-500 font-semibold">{item.prix}€</p>
+                  <p className="text-orange-500 font-semibold">{item.prix} Dhs</p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <span className="text-lg font-bold bg-gray-100 px-4 py-2 rounded">
-                    {item.quantity}
-                  </span>
+                {/* Quantité avec boutons */}
+                <div className="flex items-center gap-3 bg-gray-100 border-2 border-gray-300 rounded-lg p-2">
                   <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition transform hover:scale-105"
+                    onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-orange-500 font-bold text-lg"
                   >
-                    ❌ Supprimer
+                    −
+                  </button>
+                  <span className="w-8 text-center font-bold text-lg">{item.quantity}</span>
+                  <button
+                    onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-700 hover:text-orange-500 font-bold text-lg"
+                  >
+                    +
                   </button>
                 </div>
+
+                {/* Total article */}
+                <span className="font-bold text-orange-500 w-20 text-right">
+                  {item.prix * item.quantity} Dhs
+                </span>
+
+                {/* Supprimer */}
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition transform hover:scale-105"
+                >
+                  ❌ Supprimer
+                </button>
               </div>
             ))}
           </div>
@@ -58,11 +82,11 @@ export default function CartPage({ cart, removeFromCart, setCurrentPage }) {
         <div className="bg-gradient-to-b from-blue-900 to-blue-800 text-white rounded-xl shadow-lg p-8 h-fit sticky top-8">
           <h2 className="text-2xl font-bold mb-6">Résumé</h2>
           
-          <div className="mb-6 space-y-2">
+          <div className="mb-6 space-y-2 max-h-48 overflow-y-auto">
             {cart.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm">
+              <div key={item.id} className="flex justify-between text-sm pb-2 border-b border-white border-opacity-20">
                 <span>{item.nom} x{item.quantity}</span>
-                <span className="font-semibold">{item.prix * item.quantity}€</span>
+                <span className="font-semibold">{item.prix * item.quantity} Dhs</span>
               </div>
             ))}
           </div>
@@ -70,11 +94,14 @@ export default function CartPage({ cart, removeFromCart, setCurrentPage }) {
           <div className="border-t border-white pt-4 mb-6">
             <div className="flex justify-between text-2xl font-bold">
               <span>Total :</span>
-              <span className="text-orange-400">{total}€</span>
+              <span className="text-orange-400">{total} Dhs</span>
             </div>
           </div>
 
-          <button className="w-full bg-orange-500 hover:bg-orange-600 font-bold py-3 rounded-lg transition transform hover:scale-105 mb-4">
+          <button 
+            onClick={() => setCurrentPage('checkout')}
+            className="w-full bg-orange-500 hover:bg-orange-600 font-bold py-3 rounded-lg transition transform hover:scale-105 mb-4"
+          >
             💳 Passer la commande
           </button>
 

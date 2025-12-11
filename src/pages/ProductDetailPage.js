@@ -6,7 +6,7 @@ export default function ProductDetailPage({ productId, setCurrentPage, addToCart
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    fetch(`https://shop-api-0d5u.onrender.com/api/articles/${productId}?populate=*`)
+    fetch(`https://shop-api-production-b01f.up.railway.app/api/articles/${productId}?populate=*`)
       .then(res => res.json())
       .then(data => {
         setProduct({
@@ -15,8 +15,7 @@ export default function ProductDetailPage({ productId, setCurrentPage, addToCart
           prix: data.data.prix,
           description: data.data.description || 'Pas de description',
           categoryName: data.data.category?.name,
-          image: data.data.image ? `https://shop-api-0d5u.onrender.com${data.data.image.url}` : '👟'
-        });
+image: data.data.image ? `https://shop-api-production-b01f.up.railway.app${data.data.image.url}` : '👟'        });
         setLoading(false);
       })
       .catch(err => {

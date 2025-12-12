@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function CheckoutPage({ cart, setCurrentPage, removeFromCart }) {
+export default function CheckoutPage({ cart, removeFromCart }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -20,15 +22,15 @@ export default function CheckoutPage({ cart, setCurrentPage, removeFromCart }) {
     });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const commandeDetails = cart.map(item => 
-    `• ${item.nom} x${item.quantity} = ${item.prix * item.quantity} Dhs`
-  ).join('\n');
+    const commandeDetails = cart.map(item => 
+      `• ${item.nom} x${item.quantity} = ${item.prix * item.quantity} Dhs`
+    ).join('\n');
 
-  const message = `
+    const message = `
 NOUVELLE COMMANDE SPORT HORIZON
 ═══════════════════════════════════
 
@@ -44,36 +46,36 @@ ${commandeDetails}
 ═══════════════════════════════════
 TOTAL: ${total} Dhs
 ═══════════════════════════════════
-  `;
+    `;
 
-  try {
-    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: 'service_soyl595',
-        template_id: 'template_ep7yisw',
-        user_id: 'c9NCz7RplZ74zGGob',
-        template_params: {
-          to_email: 'learning21cs@gmail.com',
-          from_email: formData.email,
-          subject: `Commande ${formData.prenom} ${formData.nom}`,
-          message: message,
-          client_name: `${formData.prenom} ${formData.nom}`
-        }
-      })
-    });
+    try {
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: 'service_soyl595',
+          template_id: 'template_ep7yisw',
+          user_id: 'c9NCz7RplZ74zGGob',
+          template_params: {
+            to_email: 'learning21cs@gmail.com',
+            from_email: formData.email,
+            subject: `Commande ${formData.prenom} ${formData.nom}`,
+            message: message,
+            client_name: `${formData.prenom} ${formData.nom}`
+          }
+        })
+      });
 
-    if (response.ok) {
-      setSuccess(true);
-      setTimeout(() => setCurrentPage('home'), 3000);
+      if (response.ok) {
+        setSuccess(true);
+        setTimeout(() => navigate('/'), 3000);
+      }
+    } catch (error) {
+      alert('Erreur: ' + error.message);
     }
-  } catch (error) {
-    alert('Erreur: ' + error.message);
-  }
 
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   if (success) {
     return (
@@ -92,7 +94,7 @@ TOTAL: ${total} Dhs
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <button
-        onClick={() => setCurrentPage('cart')}
+        onClick={() => navigate('/cart')}
         className="mb-8 text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-2"
       >
         ← Retour au panier

@@ -1,29 +1,33 @@
-    import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-export default function ProductDetailPage({ productId, setCurrentPage, addToCart }) {
+export default function ProductDetailPage({ addToCart }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    fetch(`https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles/${productId}?populate=*`)
+    fetch(`https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles/${id}?populate=*`)
       .then(res => res.json())
       .then(data => {
         setProduct({
           id: data.data.id,
+          documentId: data.data.documentId,
           nom: data.data.nom,
           prix: data.data.prix,
           description: data.data.description || 'Pas de description',
           categoryName: data.data.category?.name,
-image: data.data.image ? `https://shop-api-strapi-1507f748e924.herokuapp.com${data.data.image.url}` : '👟'
+          image: data.data.image ? `https://shop-api-strapi-1507f748e924.herokuapp.com${data.data.image.url}` : '👟'
         });
-setLoading(false);
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
         setLoading(false);
       });
-  }, [productId]);
+  }, [id]);
 
   if (loading) return <div className="text-center py-20">Chargement...</div>;
   if (!product) return <div className="text-center py-20">Produit introuvable</div>;
@@ -32,7 +36,7 @@ setLoading(false);
     <main className="max-w-6xl mx-auto px-4 py-8">
       {/* Retour */}
       <button
-        onClick={() => setCurrentPage('home')}
+        onClick={() => navigate('/')}
         className="mb-8 text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-2"
       >
         ← Retour aux articles
@@ -84,18 +88,17 @@ setLoading(false);
 
           {/* Boutons */}
           <button
-          onClick={() => {
-  addToCart(product, quantity);
-  setCurrentPage('home');
-
-}}
+            onClick={() => {
+              addToCart(product, quantity);
+              navigate('/cart');
+            }}
             className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-4 rounded-lg hover:from-orange-600 hover:to-orange-700 transition transform hover:scale-105 mb-4"
           >
             🛒 Ajouter au panier
           </button>
 
           <button
-            onClick={() => setCurrentPage('home')}
+            onClick={() => navigate('/')}
             className="w-full border-2 border-gray-300 text-gray-800 font-bold py-4 rounded-lg hover:bg-gray-100 transition"
           >
             Continuer les achats

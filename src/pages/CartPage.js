@@ -1,4 +1,7 @@
-export default function CartPage({ cart, removeFromCart, updateCartQuantity, setCurrentPage }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function CartPage({ cart, removeFromCart, updateCartQuantity }) {
+  const navigate = useNavigate();
   const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
 
   if (cart.length === 0) {
@@ -8,7 +11,7 @@ export default function CartPage({ cart, removeFromCart, updateCartQuantity, set
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Panier vide</h2>
           <p className="text-gray-600 mb-6">Tu n'as pas encore ajouté d'articles</p>
           <button
-            onClick={() => setCurrentPage('home')}
+            onClick={() => navigate('/')}
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition transform hover:scale-105"
           >
             ← Retour aux articles
@@ -99,14 +102,14 @@ export default function CartPage({ cart, removeFromCart, updateCartQuantity, set
           </div>
 
           <button 
-            onClick={() => setCurrentPage('checkout')}
+            onClick={() => navigate('/checkout')}
             className="w-full bg-orange-500 hover:bg-orange-600 font-bold py-3 rounded-lg transition transform hover:scale-105 mb-4"
           >
             💳 Passer la commande
           </button>
 
           <button
-            onClick={() => setCurrentPage('home')}
+            onClick={() => navigate('/')}
             className="w-full border-2 border-white text-white font-bold py-2 rounded-lg hover:bg-white hover:text-blue-900 transition"
           >
             ← Continuer les achats

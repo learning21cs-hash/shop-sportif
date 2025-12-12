@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ArticleCard from '../components/ArticleCard';
 
-export default function HomePage({ addToCart, goToProductDetail }) {
+export default function HomePage({ addToCart }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -12,7 +12,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
 
   useEffect(() => {
     // Récupère les catégories
-   fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories')
+    fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data.data.map(cat => ({
@@ -192,7 +192,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((article, idx) => (
               <div key={article.id} style={{ animationDelay: `${idx * 100}ms` }} className="animate-fade-in">
-                <ArticleCard article={article} addToCart={addToCart} goToProductDetail={goToProductDetail} />
+                <ArticleCard article={article} addToCart={addToCart} />
               </div>
             ))}
           </div>

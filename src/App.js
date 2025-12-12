@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
+import ManageCategoriesPage from './pages/ManageCategoriesPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -37,6 +38,7 @@ export default function App() {
     ));
   };
 
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -49,6 +51,7 @@ export default function App() {
             <Route path="/cart" element={<CartPage cart={cart} removeFromCart={removeFromCart} updateCartQuantity={updateCartQuantity} />} />
             <Route path="/checkout" element={<CheckoutPage cart={cart} removeFromCart={removeFromCart} />} />
             <Route path="/ajouter-article" element={<AddArticlePage />} />
+            <Route path="/gerer-categories" element={<ManageCategoriesPage />} />  {/* ← Ajoute ça */}
           </Routes>
         </div>
 

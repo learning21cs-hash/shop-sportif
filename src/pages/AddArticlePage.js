@@ -72,12 +72,12 @@ export default function AddArticlePage() {
           return;
         }
 
-        if (imageFile) {
-          const formDataImage = new FormData();
-          formDataImage.append('files', imageFile);
-          formDataImage.append('ref', 'api::article.article');
-          formDataImage.append('refId', editingDocId);
-          formDataImage.append('field', 'image');
+         if (imageFile) {
+  const formDataImage = new FormData();
+  formDataImage.append('files', imageFile);
+  formDataImage.append('ref', 'api::article.article');
+  formDataImage.append('refId', sessionStorage.getItem('editingId')); // ← Utilise l'id numérique
+  formDataImage.append('field', 'image');
 
           try {
             await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/upload', {
@@ -137,15 +137,19 @@ export default function AddArticlePage() {
         setMessage('✅ Article ajouté !');
       }
 
-      setFormData({ nom: '', prix: '', categorie: '', description: '' });
-      setImageFile(null);
-      loadArticles();
+       setFormData({ nom: '', prix: '', categorie: '', description: '' });
+setImageFile(null);
+sessionStorage.removeItem('editingId'); // ← Nettoie
+loadArticles();
     } catch (err) {
       setMessage('❌ Erreur: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
+
+
+ 
 
   const handleEdit = (article) => {
   setEditingDocId(article.documentId);

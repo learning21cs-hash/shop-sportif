@@ -12,10 +12,10 @@ export default function AddArticlePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [articles, setArticles] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   const API_URL = 'https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles';
 
-  // Charger les articles au démarrage
   useEffect(() => {
     loadArticles();
   }, []);
@@ -30,7 +30,6 @@ export default function AddArticlePage() {
     }
   };
 
-  // Gérer les changements du formulaire
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -38,62 +37,105 @@ export default function AddArticlePage() {
     });
   };
 
-  // Gérer le changement d'image
   const handleImageChange = (e) => {
     setImageFile(e.target.files[0]);
   };
 
-  // Ajouter un article avec image
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
     try {
-      // Créer l'article d'abord
-      const articleRes = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: {
-            nom: formData.nom,
-            prix: parseFloat(formData.prix),
-            categorie: formData.categorie,
-            description: formData.description,
+      if (editingId) {
+        // Modifier un article existant
+        const updateRes = await fetch(`${API_URL}/${editingId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            data: {
+              nom: formData.nom,
+              prix: parseFloat(formData.prix),
+              categorie: formData.categorie,
+              description: formData.description,
+            },
+          }),
+        });
 
-      if (!articleRes.ok) {
-        setMessage('❌ Erreur lors de la création de l\'article');
-        setLoading(false);
-        return;
-      }
-
-      const articleData = await articleRes.json();
-      const articleId = articleData.data.id;
-
-      // Upload l'image si elle existe
-      if (imageFile) {
-        const formDataImage = new FormData();
-        formDataImage.append('files', imageFile);
-        formDataImage.append('ref', 'api::article.article');
-        formDataImage.append('refId', articleId);
-        formDataImage.append('field', 'image');
-
-        try {
-          await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/upload', {
-            method: 'POST',
-            body: formDataImage,
-          });
-        } catch (err) {
-          console.error('Erreur upload image:', err);
+        if (!updateRes.ok) {
+          setMessage('❌ Erreur lors de la modification');
+          setLoading(false);
+          return;
         }
+
+        // Upload nouvelle image si elle existe
+        if (imageFile) {
+          const formDataImage = new FormData();
+          formDataImage.append('files', imageFile);
+          formDataImage.append('ref', 'api::article.article');
+          formDataImage.append('refId', editingId);
+          formDataImage.append('field', 'image');
+
+          try {
+            await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/upload', {
+              method: 'POST',
+              body: formDataImage,
+            });
+          } catch (err) {
+            console.error('Erreur upload image:', err);
+          }
+        }
+
+        setMessage('✅ Article modifié avec succès !');
+        setEditingId(null);
+      } else {
+        // Créer un nouvel article
+        const articleRes = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            data: {
+              nom: formData.nom,
+              prix: parseFloat(formData.prix),
+              categorie: formData.categorie,
+              description: formData.description,
+            },
+          }),
+        });
+
+        if (!articleRes.ok) {
+          setMessage('❌ Erreur lors de la création');
+          setLoading(false);
+          return;
+        }
+
+        const articleData = await articleRes.json();
+        const articleId = articleData.data.id;
+
+        if (imageFile) {
+          const formDataImage = new FormData();
+          formDataImage.append('files', imageFile);
+          formDataImage.append('ref', 'api::article.article');
+          formDataImage.append('refId', articleId);
+          formDataImage.append('field', 'image');
+
+          try {
+            await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/upload', {
+              method: 'POST',
+              body: formDataImage,
+            });
+          } catch (err) {
+            console.error('Erreur upload image:', err);
+          }
+        }
+
+        setMessage('✅ Article ajouté avec succès !');
       }
 
-      setMessage('✅ Article ajouté avec succès !');
       setFormData({ nom: '', prix: '', categorie: '', description: '' });
       setImageFile(null);
       loadArticles();
@@ -104,9 +146,45 @@ export default function AddArticlePage() {
     }
   };
 
+  const handleEdit = (article) => {
+    setEditingId(article.id);
+    setFormData({
+      nom: article.nom,
+      prix: article.prix,
+      categorie: article.categorie,
+      description: article.description || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setMessage('✅ Article supprimé !');
+        loadArticles();
+      } else {
+        setMessage('❌ Erreur lors de la suppression');
+      }
+    } catch (err) {
+      setMessage('❌ Erreur: ' + err.message);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setFormData({ nom: '', prix: '', categorie: '', description: '' });
+    setImageFile(null);
+  };
+
   return (
     <div className="add-article-container">
-      <h1>➕ Ajouter un Article</h1>
+      <h1>{editingId ? '✏️ Modifier un Article' : '➕ Ajouter un Article'}</h1>
 
       <form onSubmit={handleSubmit} className="add-article-form">
         <input
@@ -156,9 +234,16 @@ export default function AddArticlePage() {
           {imageFile && <p className="file-name">✅ {imageFile.name}</p>}
         </div>
 
-        <button type="submit" disabled={loading} className="btn-submit">
-          {loading ? '⏳ Ajout en cours...' : '➕ Ajouter'}
-        </button>
+        <div className="form-buttons">
+          <button type="submit" disabled={loading} className="btn-submit">
+            {loading ? '⏳ En cours...' : (editingId ? '✏️ Modifier' : '➕ Ajouter')}
+          </button>
+          {editingId && (
+            <button type="button" onClick={handleCancel} className="btn-cancel">
+              ✖️ Annuler
+            </button>
+          )}
+        </div>
       </form>
 
       {message && (
@@ -185,6 +270,15 @@ export default function AddArticlePage() {
               <p className="price">💰 {article.prix}€</p>
               <p className="category">🏷️ {article.categorie}</p>
               {article.description && <p className="description">{article.description}</p>}
+              
+              <div className="article-buttons">
+                <button onClick={() => handleEdit(article)} className="btn-edit">
+                  ✏️ Modifier
+                </button>
+                <button onClick={() => handleDelete(article.id)} className="btn-delete">
+                  🗑️ Supprimer
+                </button>
+              </div>
             </div>
           ))
         )}

@@ -1,14 +1,14 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
-import CheckoutPage from './pages/CheckoutPage';
-import Footer from './components/Footer';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import CartPage from './pages/CartPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import AddArticlePage from './pages/AddArticlePage';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [selectedProductId, setSelectedProductId] = useState(null);
   const [cart, setCart] = useState([]);
 
   const addToCart = (article, quantity = 1) => {
@@ -37,51 +37,23 @@ export default function App() {
     ));
   };
 
-  const goToProductDetail = (productId, documentId) => {
-    setSelectedProductId(documentId);
-    setCurrentPage('product-detail');
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header 
-        currentPage={currentPage} 
-        setCurrentPage={setCurrentPage}
-        cartCount={cart.length}
-      />
-      
-      <div className="flex-grow">
-        {currentPage === 'home' && (
-          <HomePage addToCart={addToCart} goToProductDetail={goToProductDetail} />
-        )}
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header cartCount={cart.length} />
         
-        {currentPage === 'product-detail' && (
-          <ProductDetailPage 
-            productId={selectedProductId} 
-            setCurrentPage={setCurrentPage}
-            addToCart={addToCart}
-          />
-        )}
-        
-        {currentPage === 'cart' && (
-          <CartPage 
-            cart={cart} 
-            removeFromCart={removeFromCart}
-            updateCartQuantity={updateCartQuantity}
-            setCurrentPage={setCurrentPage}
-          />
-        )}
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage addToCart={addToCart} />} />
+            <Route path="/product/:id" element={<ProductDetailPage addToCart={addToCart} />} />
+            <Route path="/cart" element={<CartPage cart={cart} removeFromCart={removeFromCart} updateCartQuantity={updateCartQuantity} />} />
+            <Route path="/checkout" element={<CheckoutPage cart={cart} removeFromCart={removeFromCart} />} />
+            <Route path="/ajouter-article" element={<AddArticlePage />} />
+          </Routes>
+        </div>
 
-        {currentPage === 'checkout' && (
-          <CheckoutPage 
-            cart={cart}
-            setCurrentPage={setCurrentPage}
-            removeFromCart={removeFromCart}
-          />
-        )}
+        <Footer />
       </div>
-
-      <Footer />
-    </div>
+    </BrowserRouter>
   );
 }

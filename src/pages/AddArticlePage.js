@@ -148,15 +148,18 @@ export default function AddArticlePage() {
   };
 
   const handleEdit = (article) => {
-    setEditingDocId(article.documentId);
-    setFormData({
-      nom: article.nom,
-      prix: article.prix,
-      categorie: article.categorie,
-      description: article.description || '',
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  setEditingDocId(article.documentId);
+  // Ajoute ça pour l'upload :
+  sessionStorage.setItem('editingId', article.id);
+  
+  setFormData({
+    nom: article.nom,
+    prix: article.prix,
+    categorie: article.categorie,
+    description: article.description || '',
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
   const handleDelete = async (documentId) => {
     if (!window.confirm('Supprimer cet article ?')) return;

@@ -12,7 +12,7 @@ export default function AddArticlePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [articles, setArticles] = useState([]);
-  const [editingId, setEditingId] = useState(null);
+  const [editingDocId, setEditingDocId] = useState(null);
 
   const API_URL = 'https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles';
 
@@ -47,9 +47,9 @@ export default function AddArticlePage() {
     setMessage('');
 
     try {
-      if (editingId) {
-        // Modifier un article existant
-        const updateRes = await fetch(`${API_URL}/${editingId}`, {
+      if (editingDocId) {
+        // MODIFIER
+        const updateRes = await fetch(`${API_URL}/${editingDocId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -65,17 +65,18 @@ export default function AddArticlePage() {
         });
 
         if (!updateRes.ok) {
+          const errorData = await updateRes.json();
+          console.error('Erreur:', errorData);
           setMessage('❌ Erreur lors de la modification');
           setLoading(false);
           return;
         }
 
-        // Upload nouvelle image si elle existe
         if (imageFile) {
           const formDataImage = new FormData();
           formDataImage.append('files', imageFile);
           formDataImage.append('ref', 'api::article.article');
-          formDataImage.append('refId', editingId);
+          formDataImage.append('refId', editingDocId);
           formDataImage.append('field', 'image');
 
           try {
@@ -84,14 +85,14 @@ export default function AddArticlePage() {
               body: formDataImage,
             });
           } catch (err) {
-            console.error('Erreur upload image:', err);
+            console.error('Erreur upload:', err);
           }
         }
 
-        setMessage('✅ Article modifié avec succès !');
-        setEditingId(null);
+        setMessage('✅ Article modifié !');
+        setEditingDocId(null);
       } else {
-        // Créer un nouvel article
+        // CRÉER
         const articleRes = await fetch(API_URL, {
           method: 'POST',
           headers: {
@@ -129,11 +130,11 @@ export default function AddArticlePage() {
               body: formDataImage,
             });
           } catch (err) {
-            console.error('Erreur upload image:', err);
+            console.error('Erreur upload:', err);
           }
         }
 
-        setMessage('✅ Article ajouté avec succès !');
+        setMessage('✅ Article ajouté !');
       }
 
       setFormData({ nom: '', prix: '', categorie: '', description: '' });
@@ -147,7 +148,7 @@ export default function AddArticlePage() {
   };
 
   const handleEdit = (article) => {
-    setEditingId(article.id);
+    setEditingDocId(article.documentId);
     setFormData({
       nom: article.nom,
       prix: article.prix,
@@ -157,11 +158,11 @@ export default function AddArticlePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) return;
+  const handleDelete = async (documentId) => {
+    if (!window.confirm('Supprimer cet article ?')) return;
 
     try {
-      const res = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/${documentId}`, {
         method: 'DELETE',
       });
 
@@ -169,7 +170,7 @@ export default function AddArticlePage() {
         setMessage('✅ Article supprimé !');
         loadArticles();
       } else {
-        setMessage('❌ Erreur lors de la suppression');
+        setMessage('❌ Erreur suppression');
       }
     } catch (err) {
       setMessage('❌ Erreur: ' + err.message);
@@ -177,68 +178,32 @@ export default function AddArticlePage() {
   };
 
   const handleCancel = () => {
-    setEditingId(null);
+    setEditingDocId(null);
     setFormData({ nom: '', prix: '', categorie: '', description: '' });
     setImageFile(null);
   };
 
   return (
     <div className="add-article-container">
-      <h1>{editingId ? '✏️ Modifier un Article' : '➕ Ajouter un Article'}</h1>
+      <h1>{editingDocId ? '✏️ Modifier' : '➕ Ajouter'}</h1>
 
       <form onSubmit={handleSubmit} className="add-article-form">
-        <input
-          type="text"
-          name="nom"
-          placeholder="Nom de l'article"
-          value={formData.nom}
-          onChange={handleChange}
-          required
-        />
-
-        <input
-          type="number"
-          name="prix"
-          placeholder="Prix"
-          value={formData.prix}
-          onChange={handleChange}
-          step="0.01"
-          required
-        />
-
-        <input
-          type="text"
-          name="categorie"
-          placeholder="Catégorie"
-          value={formData.categorie}
-          onChange={handleChange}
-          required
-        />
-
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          rows="4"
-        />
+        <input type="text" name="nom" placeholder="Nom" value={formData.nom} onChange={handleChange} required />
+        <input type="number" name="prix" placeholder="Prix" value={formData.prix} onChange={handleChange} step="0.01" required />
+        <input type="text" name="categorie" placeholder="Catégorie" value={formData.categorie} onChange={handleChange} required />
+        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} rows="4" />
 
         <div className="image-input-group">
-          <label htmlFor="image-input">📷 Ajouter une image :</label>
-          <input
-            id="image-input"
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
+          <label htmlFor="image-input">📷 Image :</label>
+          <input id="image-input" type="file" accept="image/*" onChange={handleImageChange} />
           {imageFile && <p className="file-name">✅ {imageFile.name}</p>}
         </div>
 
         <div className="form-buttons">
           <button type="submit" disabled={loading} className="btn-submit">
-            {loading ? '⏳ En cours...' : (editingId ? '✏️ Modifier' : '➕ Ajouter')}
+            {loading ? '⏳ ...' : (editingDocId ? '✏️ Modifier' : '➕ Ajouter')}
           </button>
-          {editingId && (
+          {editingDocId && (
             <button type="button" onClick={handleCancel} className="btn-cancel">
               ✖️ Annuler
             </button>
@@ -246,42 +211,24 @@ export default function AddArticlePage() {
         </div>
       </form>
 
-      {message && (
-        <p className={`message ${message.includes('✅') ? 'success' : 'error'}`}>
-          {message}
-        </p>
-      )}
+      {message && <p className={`message ${message.includes('✅') ? 'success' : 'error'}`}>{message}</p>}
 
       <h2>📝 Articles ({articles.length})</h2>
       <div className="articles-list">
-        {articles.length === 0 ? (
-          <p className="no-articles">Aucun article pour le moment</p>
-        ) : (
-          articles.map((article) => (
-            <div key={article.id} className="article-item">
-              {article.image && (
-                <img
-                  src={`https://shop-api-strapi-1507f748e924.herokuapp.com${article.image.url}`}
-                  alt={article.nom}
-                  className="article-image"
-                />
-              )}
-              <h3>{article.nom}</h3>
-              <p className="price">💰 {article.prix}€</p>
-              <p className="category">🏷️ {article.categorie}</p>
-              {article.description && <p className="description">{article.description}</p>}
-              
-              <div className="article-buttons">
-                <button onClick={() => handleEdit(article)} className="btn-edit">
-                  ✏️ Modifier
-                </button>
-                <button onClick={() => handleDelete(article.id)} className="btn-delete">
-                  🗑️ Supprimer
-                </button>
-              </div>
+        {articles.map((article) => (
+          <div key={article.id} className="article-item">
+            {article.image && <img src={`https://shop-api-strapi-1507f748e924.herokuapp.com${article.image.url}`} alt={article.nom} className="article-image" />}
+            <h3>{article.nom}</h3>
+            <p className="price">💰 {article.prix}€</p>
+            <p className="category">🏷️ {article.categorie}</p>
+            {article.description && <p className="description">{article.description}</p>}
+            
+            <div className="article-buttons">
+              <button onClick={() => handleEdit(article)} className="btn-edit">✏️ Modifier</button>
+              <button onClick={() => handleDelete(article.documentId)} className="btn-delete">🗑️ Supprimer</button>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );

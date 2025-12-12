@@ -11,40 +11,42 @@ export default function HomePage({ addToCart }) {
   const [maxPrice, setMaxPrice] = useState(1000);
 
   useEffect(() => {
-    // Récupère les catégories
-    fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories')
-      .then(res => res.json())
-      .then(data => {
-        setCategories(data.data.map(cat => ({
-          id: cat.id,
-          name: cat.name
-        })));
-      })
-      .catch(err => console.error(err));
-
-    // Récupère les articles
-    fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles?populate=*')
-      .then(res => res.json())
-      .then(data => {
-        setArticles(data.data.map(item => ({
-          id: item.id,
-          documentId: item.documentId,
-          nom: item.nom,
-          prix: item.prix,
-          categoryId: item.category?.id,
-          categoryName: item.category?.name,
-          image: item.image ? `https://shop-api-strapi-1507f748e924.herokuapp.com${item.image.url}` : '👟'
-        })));
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+    loadCategories();
+    loadArticles();
   }, []);
 
+  const loadCategories = async () => {
+    try {
+      const res = await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories');
+      const data = await res.json();
+      setCategories(data.data || []);
+    } catch (err) {
+      console.error('Erreur catégories:', err);
+    }
+  };
+
+  const loadArticles = async () => {
+    try {
+      const res = await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles?populate=*');
+      const data = await res.json();
+      setArticles(data.data.map(item => ({
+        id: item.id,
+        documentId: item.documentId,
+        nom: item.nom,
+        prix: item.prix,
+        categoryId: item.category?.id,
+        categoryName: item.category?.name,
+        image: item.image ? `https://shop-api-strapi-1507f748e924.herokuapp.com${item.image.url}` : '👟'
+      })));
+      setLoading(false);
+    } catch (err) {
+      console.error('Erreur articles:', err);
+      setLoading(false);
+    }
+  };
+
   const filtered = articles.filter(a => {
-    const matchCategory = selectedCategory === 'all' || a.categoryId === parseInt(selectedCategory);
+    const matchCategory = selectedCategory === 'all' || (a.categoryId && a.categoryId === parseInt(selectedCategory));
     const matchSearch = a.nom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchPrice = a.prix >= minPrice && a.prix <= maxPrice;
     return matchCategory && matchSearch && matchPrice;
@@ -54,7 +56,7 @@ export default function HomePage({ addToCart }) {
 
   return (
     <main className="py-8">
-      {/* Hero attractif - pleine largeur */}
+      {/* Hero */}
       <div className="mb-12 overflow-hidden">
         <div className="relative bg-gradient-to-br from-blue-900 via-orange-500 to-blue-700 text-white p-20 shadow-2xl" style={{ minHeight: '500px' }}>
           <div className="absolute inset-0 opacity-10">
@@ -62,10 +64,8 @@ export default function HomePage({ addToCart }) {
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
           </div>
 
-          {/* Contenu */}
           <div className="relative z-10">
             <div className="flex items-center justify-between gap-8 flex-wrap">
-              {/* Texte gauche */}
               <div className="flex-1">
                 <h1 className="text-6xl font-black mb-4 leading-tight animate-fade-in">
                   Sport<br />
@@ -87,7 +87,6 @@ export default function HomePage({ addToCart }) {
                 </button>
               </div>
 
-              {/* Icônes animées droite */}
               <div className="flex gap-6 text-7xl">
                 <div className="animate-bounce" style={{ animationDelay: '0s' }}>⚽</div>
                 <div className="animate-bounce" style={{ animationDelay: '0.2s' }}>🏃</div>
@@ -95,7 +94,6 @@ export default function HomePage({ addToCart }) {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mt-12 pt-8 border-t border-white border-opacity-20">
               <div className="text-center">
                 <p className="text-3xl font-bold">500+</p>
@@ -117,7 +115,6 @@ export default function HomePage({ addToCart }) {
       {/* Recherche et Filtre */}
       <div className="max-w-6xl mx-auto px-4 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Recherche */}
           <input
             type="text"
             placeholder="🔍 Rechercher un article..."
@@ -126,7 +123,6 @@ export default function HomePage({ addToCart }) {
             className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
           />
 
-          {/* Filtre Prix Min */}
           <div>
             <label className="block text-sm font-semibold mb-2">Prix min: {minPrice} Dhs</label>
             <input
@@ -139,7 +135,6 @@ export default function HomePage({ addToCart }) {
             />
           </div>
 
-          {/* Filtre Prix Max */}
           <div>
             <label className="block text-sm font-semibold mb-2">Prix max: {maxPrice} Dhs</label>
             <input
@@ -154,7 +149,7 @@ export default function HomePage({ addToCart }) {
         </div>
       </div>
 
-      {/* Catégories et Articles avec max-width */}
+      {/* Catégories et Articles */}
       <div className="max-w-6xl mx-auto px-4">
         {/* Catégories */}
         <div className="mb-12">
@@ -198,7 +193,7 @@ export default function HomePage({ addToCart }) {
           </div>
           {filtered.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-xl text-gray-600">Aucun article ne correspond à ta recherche 😢</p>
+              <p className="text-xl text-gray-600">Aucun article ne correspond 😢</p>
             </div>
           )}
         </div>

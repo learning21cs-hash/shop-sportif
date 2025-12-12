@@ -226,7 +226,7 @@ loadArticles();
           <div key={article.id} className="article-item">
             {article.image && <img src={`https://shop-api-strapi-1507f748e924.herokuapp.com${article.image.url}`} alt={article.nom} className="article-image" />}
             <h3>{article.nom}</h3>
-            <p className="price">💰 {article.prix}€</p>
+            <p className="price">💰 {article.prix} Dhs</p>
             <p className="category">🏷️ {article.categorie}</p>
             {article.description && <p className="description">{article.description}</p>}
             

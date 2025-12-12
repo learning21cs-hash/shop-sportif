@@ -55,7 +55,7 @@ setLoading(false);
           <h1 className="text-4xl font-black text-gray-800 mb-4">{product.nom}</h1>
 
           <div className="text-5xl font-bold text-orange-500 mb-8">
-            {product.prix}€
+            {product.prix} Dhs
           </div>
 
           <p className="text-gray-600 text-lg mb-8 leading-relaxed">

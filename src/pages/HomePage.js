@@ -128,7 +128,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
 
           {/* Filtre Prix Min */}
           <div>
-            <label className="block text-sm font-semibold mb-2">Prix min: {minPrice}€</label>
+            <label className="block text-sm font-semibold mb-2">Prix min: {minPrice} Dhs</label>
             <input
               type="range"
               min="0"
@@ -141,7 +141,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
 
           {/* Filtre Prix Max */}
           <div>
-            <label className="block text-sm font-semibold mb-2">Prix max: {maxPrice}€</label>
+            <label className="block text-sm font-semibold mb-2">Prix max: {maxPrice} Dhs</label>
             <input
               type="range"
               min="0"

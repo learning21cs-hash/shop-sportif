@@ -12,13 +12,26 @@ export default function AddArticlePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [editingDocId, setEditingDocId] = useState(null);
 
   const API_URL = 'https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles';
+  const CATEGORIES_URL = 'https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories';
 
   useEffect(() => {
     loadArticles();
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const res = await fetch(CATEGORIES_URL);
+      const data = await res.json();
+      setCategories(data.data || []);
+    } catch (err) {
+      console.error('Erreur:', err);
+    }
+  };
 
   const loadArticles = async () => {
     try {
@@ -72,12 +85,12 @@ export default function AddArticlePage() {
           return;
         }
 
-         if (imageFile) {
-  const formDataImage = new FormData();
-  formDataImage.append('files', imageFile);
-  formDataImage.append('ref', 'api::article.article');
-  formDataImage.append('refId', sessionStorage.getItem('editingId')); // ← Utilise l'id numérique
-  formDataImage.append('field', 'image');
+        if (imageFile) {
+          const formDataImage = new FormData();
+          formDataImage.append('files', imageFile);
+          formDataImage.append('ref', 'api::article.article');
+          formDataImage.append('refId', editingDocId);
+          formDataImage.append('field', 'image');
 
           try {
             await fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/upload', {
@@ -137,10 +150,9 @@ export default function AddArticlePage() {
         setMessage('✅ Article ajouté !');
       }
 
-       setFormData({ nom: '', prix: '', categorie: '', description: '' });
-setImageFile(null);
-sessionStorage.removeItem('editingId'); // ← Nettoie
-loadArticles();
+      setFormData({ nom: '', prix: '', categorie: '', description: '' });
+      setImageFile(null);
+      loadArticles();
     } catch (err) {
       setMessage('❌ Erreur: ' + err.message);
     } finally {
@@ -148,22 +160,16 @@ loadArticles();
     }
   };
 
-
- 
-
   const handleEdit = (article) => {
-  setEditingDocId(article.documentId);
-  // Ajoute ça pour l'upload :
-  sessionStorage.setItem('editingId', article.id);
-  
-  setFormData({
-    nom: article.nom,
-    prix: article.prix,
-    categorie: article.categorie,
-    description: article.description || '',
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+    setEditingDocId(article.documentId);
+    setFormData({
+      nom: article.nom,
+      prix: article.prix,
+      categorie: article.categorie,
+      description: article.description || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDelete = async (documentId) => {
     if (!window.confirm('Supprimer cet article ?')) return;
@@ -197,7 +203,23 @@ loadArticles();
       <form onSubmit={handleSubmit} className="add-article-form">
         <input type="text" name="nom" placeholder="Nom" value={formData.nom} onChange={handleChange} required />
         <input type="number" name="prix" placeholder="Prix" value={formData.prix} onChange={handleChange} step="0.01" required />
-        <input type="text" name="categorie" placeholder="Catégorie" value={formData.categorie} onChange={handleChange} required />
+        
+        {/* SELECT CATÉGORIES */}
+        <select 
+          name="categorie" 
+          value={formData.categorie} 
+          onChange={handleChange} 
+          required
+          className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+        >
+          <option value="">-- Choisir une catégorie --</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+
         <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} rows="4" />
 
         <div className="image-input-group">
@@ -226,7 +248,7 @@ loadArticles();
           <div key={article.id} className="article-item">
             {article.image && <img src={`https://shop-api-strapi-1507f748e924.herokuapp.com${article.image.url}`} alt={article.nom} className="article-image" />}
             <h3>{article.nom}</h3>
-            <p className="price">💰 {article.prix} Dhs</p>
+            <p className="price">💰 {article.prix}€</p>
             <p className="category">🏷️ {article.categorie}</p>
             {article.description && <p className="description">{article.description}</p>}
             

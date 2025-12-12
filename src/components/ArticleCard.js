@@ -14,7 +14,7 @@ export default function ArticleCard({ article, addToCart, goToProductDetail }) {
         <h3 className="text-xl font-bold text-gray-800 mb-2">{article.nom}</h3>
         
         <div className="flex justify-between items-center mb-4">
-          <span className="text-3xl font-bold text-orange-500">{article.prix}€</span>
+          <span className="text-3xl font-bold text-orange-500">{article.prix} Dhs</span>
           <span className="text-sm bg-blue-100 text-blue-900 px-3 py-1 rounded-full">
             {article.categoryName}
           </span>

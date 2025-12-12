@@ -12,7 +12,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
 
   useEffect(() => {
     // Récupère les catégories
-   fetch('https://shop-api-production-b01f.up.railway.app/api/categories')
+   fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data.data.map(cat => ({
@@ -23,7 +23,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
       .catch(err => console.error(err));
 
     // Récupère les articles
-    fetch('https://shop-api-production-b01f.up.railway.app/api/articles?populate=*')
+    fetch('https://shop-api-strapi-1507f748e924.herokuapp.com/api/articles?populate=*')
       .then(res => res.json())
       .then(data => {
         setArticles(data.data.map(item => ({
@@ -33,7 +33,7 @@ export default function HomePage({ addToCart, goToProductDetail }) {
           prix: item.prix,
           categoryId: item.category?.id,
           categoryName: item.category?.name,
-          image: item.image ? `https://shop-api-production-b01f.up.railway.app${item.image.url}` : '👟'
+          image: item.image ? `https://shop-api-strapi-1507f748e924.herokuapp.com${item.image.url}` : '👟'
         })));
         setLoading(false);
       })
